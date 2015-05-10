@@ -1,0 +1,172 @@
+CLS_CODE_DATA	gdt.c	60
+CLS_SYSTEM	gdt.c	59
+DEFINES	Make.vars	3
+Elf32_Addr	process.c	329
+Elf32_Ehdr	process.c	340
+Elf32_Half	process.c	330
+Elf32_Off	process.c	329
+Elf32_Phdr	process.c	361
+Elf32_Word	process.c	329
+GRAN_BYTE	gdt.c	66
+GRAN_PAGE	gdt.c	67
+January	bochsout.txt	2
+NO_RETURN	process.c	23
+PE32Ax	process.c	334
+PE32Hx	process.c	336
+PE32Ox	process.c	335
+PE32Wx	process.c	333
+PF_P	exceition.h	5
+PF_R	process.c	386
+PF_U	exceition.h	7
+PF_W	exceition.h	6
+PF_W	process.c	385
+PF_X	process.c	384
+PT_DYNAMIC	process.c	376
+PT_INTERP	process.c	377
+PT_LOAD	process.c	375
+PT_NOTE	process.c	378
+PT_NULL	process.c	374
+PT_PHDR	process.c	380
+PT_SHLIB	process.c	379
+PT_STACK	process.c	381
+SEL_CNT	gdt.h	11
+SEL_TSS	gdt.h	10
+SEL_UCSEG	gdt.h	8
+SEL_UDSEG	gdt.h	9
+USERPROG_EXCEPTION_H	exceition.h	2
+USERPROG_GDT_H	gdt.h	2
+USERPROG_PAGEDIR_H	pagedir.h	2
+USERPROG_PROCESS_H	process.h	2
+USERPROG_SYSCALL_H	syscall.h	2
+USERPROG_TSS_H	tss.h	2
+active_pd	pagedir.c	/^active_pd (void) $/
+address	process.c	109
+alignment	bochsout.txt	33
+argument	process.c	105
+argument	process.c	108
+back_link	tss.c	53
+bitmap	tss.c	72
+close	syscall.c	/^close (int fd)$/
+cr3	tss.c	60
+create	syscall.c	/^create (const char *file, unsigned initial_size)$/
+cs	tss.c	66
+deny_write	process.h	11
+disk	test	1
+ds	tss.c	68
+e_ehsize	process.c	350
+e_entry	process.c	346
+e_flags	process.c	349
+e_ident	process.c	342
+e_machine	process.c	344
+e_phentsize	process.c	351
+e_phnum	process.c	352
+e_phoff	process.c	347
+e_shentsize	process.c	353
+e_shnum	process.c	354
+e_shoff	process.c	348
+e_shstrndx	process.c	355
+e_type	process.c	343
+e_version	process.c	345
+eax	tss.c	63
+ebp	tss.c	64
+ebx	tss.c	63
+ecx	tss.c	63
+edi	tss.c	64
+edx	tss.c	63
+eflags	tss.c	62
+eip	tss.c	/^    void (*eip) (void);$/
+elem	process.c	107
+es	tss.c	65
+esi	tss.c	64
+esp	tss.c	64
+esp0	tss.c	54
+esp1	tss.c	56
+esp2	tss.c	58
+exception_init	exceition.c	/^exception_init (void) $/
+exception_print_stats	exceition.c	/^exception_print_stats (void) $/
+exec	syscall.c	/^exec (const char *cmd_line)$/
+exit	syscall.c	/^exit (int status)$/
+fd	process.h	17
+fd	syscall.c	16
+file	bochcrc.txt	1
+file	process.h	16
+file	process.h	7
+file_elem	process.h	14
+file_list	syscall.c	14
+filesize	syscall.c	/^filesize (int fd)$/
+filesys_lock	syscall.c	13
+find_thread	process.c	/^find_thread (tid_t tid)$/
+fs	tss.c	69
+gdt	gdt.c	25
+gdt_init	gdt.c	/^gdt_init (void)$/
+global_elem	process.h	18
+global_get_file	syscall.c	/^global_get_file (int fd)$/
+gs	tss.c	70
+init	../threads/tags	/^function	init.c	\/^      void (*function) (char **a/
+inode	process.h	9
+install_page	process.c	/^install_page (void *upage, void *kpage, bool writa/
+invalidate_pagedir	pagedir.c	/^invalidate_pagedir (uint32_t *pd) $/
+kill	exceition.c	/^kill (struct intr_frame *f) $/
+ldt	tss.c	71
+load	process.c	/^load (const char *file_name, void (**eip) (void), /
+load_segment	process.c	/^load_segment (struct file *file, off_t ofs, uint8_/
+lookup_page	pagedir.c	/^lookup_page (uint32_t *pd, const void *vaddr, bool/
+make_code_desc	gdt.c	/^make_code_desc (int dpl)$/
+make_data_desc	gdt.c	/^make_data_desc (int dpl)$/
+make_gdtr_operand	gdt.c	/^make_gdtr_operand (uint16_t limit, void *base)$/
+make_seg_desc	gdt.c	/^make_seg_desc (uint32_t base,$/
+make_tss_desc	gdt.c	/^make_tss_desc (void *laddr)$/
+open	syscall.c	/^open (const char *file)$/
+p_align	process.c	370
+p_filesz	process.c	367
+p_flags	process.c	369
+p_memsz	process.c	368
+p_offset	process.c	364
+p_paddr	process.c	366
+p_type	process.c	363
+p_vaddr	process.c	365
+page_fault	exceition.c	/^page_fault (struct intr_frame *f) $/
+page_fault_cnt	exceition.c	11
+pagedir_activate	pagedir.c	/^pagedir_activate (uint32_t *pd) $/
+pagedir_clear_page	pagedir.c	/^pagedir_clear_page (uint32_t *pd, void *upage) $/
+pagedir_create	pagedir.c	/^pagedir_create (void) $/
+pagedir_destroy	pagedir.c	/^pagedir_destroy (uint32_t *pd) $/
+pagedir_get_page	pagedir.c	/^pagedir_get_page (uint32_t *pd, const void *uaddr)/
+pagedir_is_accessed	pagedir.c	/^pagedir_is_accessed (uint32_t *pd, const void *vpa/
+pagedir_is_dirty	pagedir.c	/^pagedir_is_dirty (uint32_t *pd, const void *vpage)/
+pagedir_set_accessed	pagedir.c	/^pagedir_set_accessed (uint32_t *pd, const void *vp/
+pagedir_set_dirty	pagedir.c	/^pagedir_set_dirty (uint32_t *pd, const void *vpage/
+pagedir_set_page	pagedir.c	/^pagedir_set_page (uint32_t *pd, void *upage, void /
+pid_t	syscall.h	6
+pos	process.h	10
+process_activate	process.c	/^process_activate (void)$/
+process_execute	process.c	/^process_execute (const char *file_name) $/
+process_exit	process.c	/^process_exit (void)$/
+process_get_file	syscall.c	/^process_get_file (int fd)$/
+process_wait	process.c	/^process_wait (tid_t child_tid UNUSED) $/
+read	syscall.c	/^read (int fd, void *buffer, unsigned size)$/
+remove	syscall.c	/^remove (const char *file)$/
+seek	syscall.c	/^seek(int fd , unsigned position)$/
+seg_class	gdt.c	57
+seg_granularity	gdt.c	64
+setup_stack	process.c	/^setup_stack (void **esp) $/
+ss	tss.c	67
+ss0	tss.c	55
+ss1	tss.c	57
+ss2	tss.c	59
+start_process	process.c	/^start_process (void *f_name)$/
+syscall_handler	syscall.c	/^syscall_handler (struct intr_frame *f UNUSED) $/
+syscall_init	syscall.c	/^syscall_init (void) $/
+tell	syscall.c	/^tell (int fd)$/
+thread	../threads/tags	/^function	thread.c	44$/
+thread_elem	process.h	19
+trace	tss.c	72
+tss	tss.c	51
+tss	tss.c	76
+tss_get	tss.c	/^tss_get (void) $/
+tss_init	tss.c	/^tss_init (void) $/
+tss_update	tss.c	/^tss_update (void) $/
+validate_segment	process.c	/^validate_segment (const struct Elf32_Phdr *phdr, s/
+vector	bochsout.txt	33
+write	syscall.c	/^write (int fd, const void *buffer, unsigned size)$/
+yes	bochsout.txt	10

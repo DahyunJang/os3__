@@ -1,0 +1,341 @@
+.func	intr-stubs.S	/^.func intr_entry$/
+.func	intr-stubs.S	/^.func intr_exit$/
+.func	intr-stubs.S	/^.func intr##NUMBER##_stub;			\\$/
+.func	starS.S	/^.func start$/
+.func	switch.S	/^.func switch_threads$/
+.func	switch.S	/^.func switch_entry$/
+.globl	intr-stubs.S	/^.globl intr_handler$/
+.globl	intr-stubs.S	/^.globl intr_exit$/
+.globl	intr-stubs.S	/^.globl intr_stubs$/
+.globl	intr-stubs.S	/^.globl intr##NUMBER##_stub;                     \\$/
+.globl	loader.S	/^.globl start$/
+.globl	starS.S	/^.globl start$/
+.globl	switch.S	/^.globl switch_threads$/
+.globl	switch.S	/^.globl thread_stack_ofs$/
+.globl	switch.S	/^.globl switch_entry$/
+.globl	switch.S	/^.globl schedule_tail$/
+.section	starS.S	/^.section .start$/
+ARENA_MAGIC	malloc.c	47
+BITMASK	vaddh.h	/^#define BITMASK(SHIFT, CNT) (((1ul << (CNT)) - 1) /
+DEFINES	Make.vars	3
+FLAG_IF	flagh.h	6
+FLAG_MBS	flagh.h	5
+INTR_CNT	inteurupt.c	14
+INTR_OFF	inteurupt.h	10
+INTR_ON	inteurupt.h	11
+LOADER_ARGS	loader.h	22
+LOADER_ARGS_LEN	loader.h	28
+LOADER_ARG_CNT	loader.h	23
+LOADER_ARG_CNT_LEN	loader.h	29
+LOADER_BASE	loader.h	5
+LOADER_END	loader.h	6
+LOADER_KERN_BASE	loader.h	9
+LOADER_PHYS_BASE	loader.h	18
+LOADER_RAM_PGS	loader.h	24
+LOADER_RAM_PGS_LEN	loader.h	30
+LOADER_SIG	loader.h	21
+LOADER_SIG_LEN	loader.h	27
+Minit	init.c	/^int main (void) NO_RETURN;$/
+PAL_ASSERT	palloc.h	9
+PAL_USER	palloc.h	11
+PAL_ZERO	palloc.h	10
+PDBITS	pte.h	28
+PDMASK	pte.h	29
+PDSHIFT	pte.h	27
+PGBITS	vaddh.h	19
+PGMASK	vaddh.h	21
+PGSHIFT	vaddh.h	18
+PGSIZE	vaddh.h	20
+PHYS_BASE	vaddh.h	53
+PRI_DEFAULT	thread.h	24
+PRI_MAX	thread.h	25
+PRI_MIN	thread.h	23
+PTBITS	pte.h	22
+PTE_A	pte.h	67
+PTE_ADDR	pte.h	62
+PTE_AVL	pte.h	63
+PTE_D	pte.h	68
+PTE_FLAGS	pte.h	61
+PTE_P	pte.h	64
+PTE_U	pte.h	66
+PTE_W	pte.h	65
+PTMASK	pte.h	24
+PTSHIFT	pte.h	21
+PTSPAN	pte.h	23
+SEL_KCSEG	loader.h	35
+SEL_KDSEG	loader.h	36
+SEL_NULL	loader.h	34
+SWITCH_CUR	switch.h	36
+SWITCH_NEXT	switch.h	37
+THREADS_FLAGS_H	flagh.h	2
+THREADS_INIT_H	init.h	2
+THREADS_INTERRUPT_H	inteurupt.h	2
+THREADS_INTR_STUBS_H	intr-stubs.h	2
+THREADS_IO_H	io.h	42
+THREADS_LOADER_H	loader.h	2
+THREADS_MALLOC_H	malloc.h	2
+THREADS_PALLOC_H	palloc.h	2
+THREADS_PTE_H	pte.h	2
+THREADS_SWITCH_H	switch.h	2
+THREADS_SYNCH_H	synch.h	2
+THREADS_THREAD_H	thread.h	2
+THREADS_VADDR_H	vaddh.h	2
+THREAD_BASIC	thread.c	25
+THREAD_BLOCKED	thread.h	13
+THREAD_DYING	thread.h	14
+THREAD_MAGIC	thread.c	21
+THREAD_READY	thread.h	12
+THREAD_RUNNING	thread.h	11
+TID_ERROR	thread.h	20
+TIME_SLICE	thread.c	54
+action	init.c	279
+all_elem	thread.h	107
+all_list	thread.c	30
+alloc_frame	thread.c	/^alloc_frame (struct thread *t, size_t size) $/
+allocate_tid	thread.c	/^allocate_tid (void) $/
+arena	malloc.c	50
+arena_to_block	malloc.c	/^arena_to_block (struct arena *a, size_t idx) $/
+arg_cnt	loader.S	/^arg_cnt:$/
+argc	init.c	282
+args	loader.S	/^args:$/
+aux	thread.c	45
+barrier	synch.h	/^#define barrier() asm volatile ("" : : : "memory")/
+base	palloc.c	34
+base_page_dir	init.c	42
+block	malloc.c	58
+block_size	malloc.c	40
+block_size	malloc.c	/^block_size (void *block) $/
+block_to_arena	malloc.c	/^block_to_arena (struct block *b)$/
+blocks_per_arena	malloc.c	41
+calloc	malloc.c	/^calloc (size_t a, size_t b) $/
+calloc	malloc.h	/^void *calloc (size_t, size_t) __attribute__ ((mall/
+child_elem	thread.h	106
+children_list	thread.h	105
+cond_broadcast	syncc.c	/^cond_broadcast (struct condition *cond, struct loc/
+cond_init	syncc.c	/^cond_init (struct condition *cond)$/
+cond_signal	syncc.c	/^cond_signal (struct condition *cond, struct lock */
+cond_wait	syncc.c	/^cond_wait (struct condition *cond, struct lock *lo/
+condition	synch.h	34
+cs	inteurupt.h	52
+cur	switch.h	13
+desc	malloc.c	38
+desc	malloc.c	53
+desc_cnt	malloc.c	65
+descs	malloc.c	64
+ds	inteurupt.h	35
+eax	inteurupt.h	31
+ebp	inteurupt.h	26
+ebp	switch.h	10
+ebx	inteurupt.h	28
+ebx	switch.h	11
+ecx	inteurupt.h	30
+edi	inteurupt.h	24
+edi	switch.h	8
+edx	inteurupt.h	29
+eflags	inteurupt.h	53
+eip	inteurupt.h	/^    void (*eip) (void);         \/* Next instructio/
+eip	switch.h	/^    void (*eip) (void);         \/* 16: Return addr/
+eip	switch.h	/^    void (*eip) (void);$/
+eip	thread.c	43
+elem	syncc.c	254
+elem	thread.h	93
+error_code	inteurupt.h	43
+es	inteurupt.h	34
+esi	inteurupt.h	25
+esi	switch.h	9
+esp	inteurupt.h	54
+esp_dummy	inteurupt.h	27
+exec	thread.h	119
+exit	thread.h	110
+exit2	thread.h	111
+exit_status	thread.h	114
+file_list	thread.h	118
+format_filesys	init.c	46
+frame_pointer	inteurupt.h	47
+free	malloc.c	/^free (void *p) $/
+free_cnt	malloc.c	54
+free_elem	malloc.c	60
+free_list	malloc.c	42
+fs	inteurupt.h	33
+function	init.c	/^      void (*function) (char **argv);   \/* Functio/
+function	thread.c	44
+gdt	loader.S	/^gdt:$/
+gdtdesc	loader.S	/^gdtdesc:$/
+gs	inteurupt.h	32
+holder	synch.h	23
+idle	thread.c	/^idle (void *idle_started_ UNUSED) $/
+idle_thread	thread.c	32
+idle_ticks	thread.c	49
+idt	inteurupt.c	20
+in_external_intr	inteurupt.c	35
+inb	io.h	/^inb (uint16_t port)$/
+init	thread.h	112
+init2	thread.h	113
+init_pool	palloc.c	/^init_pool (struct pool *p, void *base, size_t page/
+init_thread	thread.c	/^init_thread (struct thread *t, const char *name, i/
+initial_thread	thread.c	35
+inl	io.h	/^inl (uint16_t port)$/
+insb	io.h	/^insb (uint16_t port, void *addr, size_t cnt)$/
+insl	io.h	/^insl (uint16_t port, void *addr, size_t cnt)$/
+insw	io.h	/^insw (uint16_t port, void *addr, size_t cnt)$/
+intr_context	inteurupt.c	/^intr_context (void) $/
+intr_disable	inteurupt.c	/^intr_disable (void) $/
+intr_dump_frame	inteurupt.c	/^intr_dump_frame (const struct intr_frame *f) $/
+intr_enable	inteurupt.c	/^intr_enable (void) $/
+intr_entry	intr-stubs.S	/^intr_entry:$/
+intr_exit	intr-stubs.S	/^intr_exit:$/
+intr_frame	inteurupt.h	20
+intr_get_level	inteurupt.c	/^intr_get_level (void) $/
+intr_handler	inteurupt.c	/^intr_handler (struct intr_frame *frame) $/
+intr_handler_func	inteurupt.h	58
+intr_handlers	inteurupt.c	23
+intr_init	inteurupt.c	/^intr_init (void)$/
+intr_level	inteurupt.h	8
+intr_name	inteurupt.c	/^intr_name (uint8_t vec) $/
+intr_names	inteurupt.c	26
+intr_register_ext	inteurupt.c	/^intr_register_ext (uint8_t vec_no, intr_handler_fu/
+intr_register_int	inteurupt.c	/^intr_register_int (uint8_t vec_no, int dpl, enum i/
+intr_set_level	inteurupt.c	/^intr_set_level (enum intr_level level) $/
+intr_stub_func	intr-stubs.h	13
+intr_stubs	intr-stubs.S	/^intr_stubs:$/
+intr_yield_on_return	inteurupt.c	/^intr_yield_on_return (void) $/
+inw	io.h	/^inw (uint16_t port)$/
+is_kernel_vaddr	vaddh.h	/^is_kernel_vaddr (const void *vaddr) $/
+is_thread	thread.c	/^static bool is_thread (struct thread *) UNUSED;$/
+is_thread	thread.c	/^is_thread (struct thread *t)$/
+is_user_vaddr	vaddh.h	/^is_user_vaddr (const void *vaddr) $/
+kernel_pool	palloc.c	38
+kernel_thread	thread.c	/^kernel_thread (thread_func *function, void *aux) $/
+kernel_thread_frame	thread.c	41
+kernel_ticks	thread.c	50
+lock	malloc.c	43
+lock	palloc.c	32
+lock	synch.h	21
+lock_acquire	syncc.c	/^lock_acquire (struct lock *lock)$/
+lock_held_by_current_thread	syncc.c	/^lock_held_by_current_thread (const struct lock *lo/
+lock_init	syncc.c	/^lock_init (struct lock *lock)$/
+lock_release	syncc.c	/^lock_release (struct lock *lock) $/
+lock_try_acquire	syncc.c	/^lock_try_acquire (struct lock *lock)$/
+magic	malloc.c	52
+magic	thread.h	101
+make_gate	inteurupt.c	/^make_gate (void (*function) (void), int dpl, int t/
+make_idtr_operand	inteurupt.c	/^make_idtr_operand (uint16_t limit, void *base)$/
+make_intr_gate	inteurupt.c	/^make_intr_gate (void (*function) (void), int dpl)$/
+make_trap_gate	inteurupt.c	/^make_trap_gate (void (*function) (void), int dpl)$/
+malloc	malloc.c	/^malloc (size_t size) $/
+malloc	malloc.h	/^void *malloc (size_t) __attribute__ ((malloc));$/
+malloc_init	malloc.c	/^malloc_init (void) $/
+name	init.c	281
+name	thread.h	88
+next	switch.h	14
+next_thread_to_run	thread.c	/^next_thread_to_run (void) $/
+outb	io.h	/^outb (uint16_t port, uint8_t data)$/
+outl	io.h	/^outl (uint16_t port, uint32_t data)$/
+outsb	io.h	/^outsb (uint16_t port, const void *addr, size_t cnt/
+outsl	io.h	/^outsl (uint16_t port, const void *addr, size_t cnt/
+outsw	io.h	/^outsw (uint16_t port, const void *addr, size_t cnt/
+outw	io.h	/^outw (uint16_t port, uint16_t data)$/
+page_from_pool	palloc.c	/^page_from_pool (const struct pool *pool, void *pag/
+pagedir	thread.h	97
+paging_init	init.c	/^paging_init (void)$/
+palloc_flags	palloc.h	7
+palloc_free_multiple	palloc.c	/^palloc_free_multiple (void *pages, size_t page_cnt/
+palloc_free_page	palloc.c	/^palloc_free_page (void *page) $/
+palloc_get_multiple	palloc.c	/^palloc_get_multiple (enum palloc_flags flags, size/
+palloc_get_page	palloc.c	/^palloc_get_page (enum palloc_flags flags) $/
+palloc_init	palloc.c	/^palloc_init (void) $/
+panic	loader.S	/^panic:  .code16			# We only panic in real mode.$/
+panic_message	loader.S	/^panic_message:$/
+parent	thread.h	104
+parse_options	init.c	/^parse_options (char **argv) $/
+pd_no	pte.h	/^static inline uintptr_t pd_no (const void *va) {$/
+pde_create	pte.h	/^static inline uint32_t pde_create (uint32_t *pt) {/
+pde_get_pt	pte.h	/^static inline uint32_t *pde_get_pt (uint32_t pde) /
+pg_no	vaddh.h	/^static inline uintptr_t pg_no (const void *va) {$/
+pg_ofs	vaddh.h	/^static inline unsigned pg_ofs (const void *va) {$/
+pg_round_down	vaddh.h	/^static inline void *pg_round_down (const void *va)/
+pg_round_up	vaddh.h	/^static inline void *pg_round_up (const void *va) {/
+pic_end_of_interrupt	inteurupt.c	/^pic_end_of_interrupt (int irq) $/
+pic_init	inteurupt.c	/^pic_init (void)$/
+pool	palloc.c	30
+power_off	init.c	/^power_off (void) $/
+power_off	init.h	/^void power_off (void) NO_RETURN;$/
+power_off_when_done	init.c	50
+print_stats	init.c	/^print_stats (void) $/
+priority	thread.h	90
+pt_no	pte.h	/^static inline unsigned pt_no (const void *va) {$/
+pte_create_kernel	pte.h	/^static inline uint32_t pte_create_kernel (void *pa/
+pte_create_user	pte.h	/^static inline uint32_t pte_create_user (void *page/
+pte_get_page	pte.h	/^static inline void *pte_get_page (uint32_t pte) {$/
+ptov	vaddh.h	/^ptov (uintptr_t paddr)$/
+ram_init	init.c	/^ram_init (void) $/
+ram_pages	init.c	39
+ram_pgs	loader.S	/^ram_pgs:$/
+read_command_line	init.c	/^read_command_line (void) $/
+read_sector	loader.S	/^read_sector:$/
+ready_list	thread.c	29
+realloc	malloc.c	/^realloc (void *old_block, size_t new_size) $/
+register_handler	inteurupt.c	/^register_handler (uint8_t vec_no, int dpl, enum in/
+run_actions	init.c	/^run_actions (char **argv) $/
+run_task	init.c	/^run_task (char **argv)$/
+running_thread	thread.c	/^running_thread (void) $/
+schedule	thread.c	/^schedule (void) $/
+schedule_tail	thread.c	/^schedule_tail (struct thread *prev) $/
+sema_down	syncc.c	/^sema_down (struct semaphore *sema) $/
+sema_init	syncc.c	/^sema_init (struct semaphore *sema, unsigned value)/
+sema_self_test	syncc.c	/^sema_self_test (void) $/
+sema_test_helper	syncc.c	/^sema_test_helper (void *sema_) $/
+sema_try_down	syncc.c	/^sema_try_down (struct semaphore *sema) $/
+sema_up	syncc.c	/^sema_up (struct semaphore *sema) $/
+semaphore	syncc.c	255
+semaphore	synch.h	8
+semaphore	synch.h	24
+semaphore_elem	syncc.c	252
+ss	inteurupt.h	55
+stack	thread.h	89
+start	loader.S	/^start:$/
+start	starS.S	/^start:	call main$/
+status	thread.h	87
+switch_entry	switch.S	/^switch_entry:$/
+switch_entry_frame	switch.h	23
+switch_threads	switch.S	/^switch_threads:$/
+switch_threads_frame	switch.h	6
+thread	thread.h	83
+thread_block	thread.c	/^thread_block (void) $/
+thread_create	thread.c	/^thread_create (const char *name, int priority,$/
+thread_current	thread.c	/^thread_current (void) $/
+thread_exit	thread.c	/^thread_exit (void) $/
+thread_exit	thread.h	/^void thread_exit (void) NO_RETURN;$/
+thread_func	thread.h	134
+thread_get_load_avg	thread.c	/^thread_get_load_avg (void) $/
+thread_get_nice	thread.c	/^thread_get_nice (void) $/
+thread_get_priority	thread.c	/^thread_get_priority (void) $/
+thread_get_recent_cpu	thread.c	/^thread_get_recent_cpu (void) $/
+thread_mlfqs	thread.c	60
+thread_name	thread.c	/^thread_name (void) $/
+thread_print_stats	thread.c	/^thread_print_stats (void) $/
+thread_set_nice	thread.c	/^thread_set_nice (int nice UNUSED) $/
+thread_set_priority	thread.c	/^thread_set_priority (int new_priority) $/
+thread_stack_ofs	thread.c	579
+thread_start	thread.c	/^thread_start (void) $/
+thread_status	thread.h	9
+thread_tick	thread.c	/^thread_tick (void) $/
+thread_ticks	thread.c	55
+thread_tid	thread.c	/^thread_tid (void) $/
+thread_unblock	thread.c	/^thread_unblock (struct thread *t) $/
+thread_yield	thread.c	/^thread_yield (void) $/
+tid	thread.h	86
+tid_lock	thread.c	38
+tid_t	thread.h	19
+usage	init.c	/^usage (void)$/
+used_map	palloc.c	33
+user_page_limit	palloc.c	41
+user_pool	palloc.c	38
+user_ticks	thread.c	51
+value	synch.h	10
+vec_no	inteurupt.h	38
+vtop	vaddh.h	/^vtop (const void *vaddr)$/
+wait	thread.h	115
+waiters	synch.h	11
+waiters	synch.h	36
+yield_on_return	inteurupt.c	36
