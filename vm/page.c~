@@ -1,0 +1,25 @@
+#include "vm/page.h"
+
+
+bool swap_init () 
+{
+
+  sd.swap_block = block_get_role (BLOCK_SWAP);
+  if (sd.swap_block == NULL)
+    return false;
+  
+  sd.swap_map = bitmap_create()
+
+
+  lock_init(&sd.swap_lock);
+}
+
+
+void frame_destroy (struct frame_entry *fe) {
+  if (fe == NULL) return;
+
+  //remove frame from list
+  //free allocated frame
+
+}
+
