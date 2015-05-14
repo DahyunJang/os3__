@@ -145,21 +145,31 @@ bool fe_evict ()
 {
   struct list_elem *iter;
   struct frame_entry *fe;
+  struct sup_entry *se_tmp;
   bool ret = false;
   bool is_accessed = false;
+  int acc_cnt;
 
   //find fe to evict
-  // alliased page which is not generated from fe_alloc???
-  for (iter = list_begin (&ft.frame_list); ;  ) 
+  for (iter = list_begin (&ft.frame_list); 
+       list_next(iter) != list_end(&ft.frame_list; 
+       iter = list_next(iter) ) 
     {
-      LIST_ENTRY () 
+      acc_cnt = 0;
+      fe = list_entnry (iter, struct sup_entry, elem);
+      se_tmp = fe->se;
+      
+      do {
+	if (pagedir_is_accessed (se_tmp->thread->pagedir, se_tmp->uva))
+	  {
+	    pagedir_set_accessed (se_tmp->thread->pagedir, se_tmp->uva, false);
+	    acc_cnt ++;
+	  }
 
-      if (pagedir_is_accessed (fe->se->t->pagedir, fe->se->uva))
-	{
-	  pagedir_set_accessed (t->pagedir, fe->se->uva, false);
-	}
+	se_tmp = se_tmp->ali_next;
+      }while (se_tmp != NULL);
 
-      else break;
+      if (acc_cnt == 0) break;
     }
   
   if (fe->s_ent->type_swap) 
@@ -173,6 +183,7 @@ bool fe_evict ()
       //project 3-2, other types like file
       //if page is dirty write to file
     }
+
   
   return ret;
 }
@@ -225,7 +236,6 @@ static void page_destroy_func (struct hash_elem *e, void *aux UNUSED)
 
 void sup_init ()
 {
-  init_lock (&thread_current()->spt.lock);
   hash_init (&thread_current()->spt.sup_hash, page_hash_func, page_less_func, NULL);
 }
 
@@ -263,7 +273,7 @@ void load_swap (struct sup_entry *se)
   swap_in (fe);
 }
 
-bool stack_grow (void *uva) 
+bool grow_stack (void *uva) 
 {
   if (PHYS_BASE - pg_round_down(uva) > MAX_STACK_SIZE)
       return false;
@@ -278,8 +288,9 @@ bool stack_grow (void *uva)
   fe_alloc (se);
 
 
-  //install page here
-  //install se-fe 
+  if(!install_page (se->uva, se->fe->frame, se->writable))
+    fe_remove (se->fe);
+  return false;
 
   hash_insert(&thread_current()->spt, &se->elem);
   return true;

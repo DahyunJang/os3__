@@ -25,11 +25,6 @@ struct swap_disk {
 
 } sd;
 
-
-bool swap_init ();
-bool swap_in (struct frame_entry *);
-bool swap_out (struct frame_entry *);
-
 /*----------------- FRAME TABLE -----------------*/
 struct frame_table {
   struct lock lock;
@@ -45,12 +40,9 @@ struct frame_entry {
   void *frame;
 }
 
-
-
 /*---------------SUP PAGE TABLE-----------------*/
 
 struct sup_table {
-  struct lock lock;
   struct hash sup_hash;
 }; 
 //in threads structure, 
@@ -62,19 +54,32 @@ struct sup_entry {
   struct hash_elem elem;
   bool type_swap;
 
-
-
   struct frame_entry *fe;
-  /* aliasing -> page list : modify page installation  */  
-  struct sup_entry *ali_prev;
-  struct sup_entry *ali_next;
-  //only head(ali_prev == NULL) alias have swap_idx.
-  block_sector_t swap_idx;
   
+  //only head(ali_prev == NULL) alias have swap_idx.
+  struct sup_entry *ali_prev; //aliased se
+  struct sup_entry *ali_next;
+  
+  block_sector_t swap_idx;
+
+  bool writable = true; //when is it becomes false?
   //free rsc when process terminated
   //exception error code? or page fault..
-} 
+};
 
+/*---------------FUNCTIONS-----------------*/
 
-bool sup_init ();
+bool swap_init (); 
+bool swap_out (struct frame_entry *fe);
+bool swap_in (struct frame_entry *fe);
 
+bool fe_init ();
+struct frame_entry* fe_alloc (struct sup_entry *se);
+bool fe_remove (struct frame_entry *fe);
+bool fe_evict ();
+
+void sup_init ();
+void pt_destroy ();
+struct sup_entry* get_se (void *uva);
+void load_swap (struct sup_entry *se);
+bool grow_stack (void *uva);
