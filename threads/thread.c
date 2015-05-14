@@ -89,9 +89,11 @@ thread_init (void)
 {
   ASSERT (intr_get_level () == INTR_OFF);
 
+  //sup_init();
+
   lock_init (&tid_lock);
   list_init (&ready_list);
-	list_init (&all_list);
+  list_init (&all_list);
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
   init_thread (initial_thread, "main", PRI_DEFAULT);
@@ -184,7 +186,7 @@ thread_create (const char *name, int priority,
   tid = t->tid = allocate_tid ();
 
   /* Stack frame for kernel_thread(). */
-  kf = alloc_frame (t, sizeof *kf);
+  kf = alloc_frame (t, sizeof *kf); ////
   kf->eip = NULL;
   kf->function = function;
   kf->aux = aux;

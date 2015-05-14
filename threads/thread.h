@@ -1,9 +1,12 @@
 #ifndef THREADS_THREAD_H
 #define THREADS_THREAD_H
 #include "threads/synch.h"
+//#include "vm/page.h"
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#include <hash.h>
+
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -96,7 +99,7 @@ struct thread
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
 #endif
-
+    struct hash sup_hash;
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
 		

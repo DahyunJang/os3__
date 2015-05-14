@@ -11,9 +11,12 @@
 #include "devices/disk.h"
 #include "userprog/syscall.h"
 #include "userprog/exception.h"
+#include "userprog/pagedir.h"
+#include "userprog/process.h"
 
-#define SECTORS_PER_PAGE (PGSIZE/BLOCK_SECTOR_SIZE) 
 
+#define SECTORS_PER_PAGE (PGSIZE/DISK_SECTOR_SIZE) 
+#define MAX_STACK_SIZE 8000000
 
 /*------------------- SWAP --------------------*/
 struct swap_disk {
@@ -33,24 +36,19 @@ struct frame_table {
 
 struct frame_entry {
   struct list_elem elem;
-
-  
-  struct sup_entry *s_ent;
+  struct sup_entry *se;
 
   void *frame;
-}
+};
 
 /*---------------SUP PAGE TABLE-----------------*/
 
-struct sup_table {
-  struct hash sup_hash;
-}; 
 //in threads structure, 
 //plz declare "struct sup_table spt";
 
 struct sup_entry {
   void *uva;
-  struct threads *thread;
+  struct thread *thread;
   struct hash_elem elem;
   bool type_swap;
 
@@ -62,24 +60,24 @@ struct sup_entry {
   
   disk_sector_t swap_idx;
 
-  bool writable = true; //when is it becomes false?
+  bool writable; //when is it becomes false?
   //free rsc when process terminated
   //exception error code? or page fault..
 };
 
 /*---------------FUNCTIONS-----------------*/
 
-bool swap_init (); 
+bool swap_init (void); 
 bool swap_out (struct frame_entry *fe);
 bool swap_in (struct frame_entry *fe);
 
-bool fe_init ();
+void fe_init (void);
 struct frame_entry* fe_alloc (struct sup_entry *se);
 bool fe_remove (struct frame_entry *fe);
-bool fe_evict ();
+bool fe_evict (void);
 
-void sup_init ();
-void pt_destroy ();
+void sup_init (void);
+void pt_destroy (void);
 struct sup_entry* get_se (void *uva);
 void load_swap (struct sup_entry *se);
 bool grow_stack (void *uva);

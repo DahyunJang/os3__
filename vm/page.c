@@ -3,7 +3,7 @@
 
 bool swap_init () 
 {
-  sd.swap_disk = disk.get (1:1);
+  sd.swap_disk = disk_get (1,1); //swap
   if (sd.swap_disk == NULL)
     return false;
   sd.num_slot = disk_size(sd.swap_disk)/SECTORS_PER_PAGE;
@@ -28,9 +28,9 @@ bool swap_out (struct frame_entry *fe)
 
   if (fe == NULL || sd.swap_disk == NULL || sd.swap_map == NULL)
     PANIC ("swap_out : NULL failed");
-  if(fe->s_ent == NULL)
-    PANIC ("swap_out : s_ent is NULL");
-  if (!fe->s_ent->type_swap)
+  if(fe->se == NULL)
+    PANIC ("swap_out : se is NULL");
+  if (!fe->se->type_swap)
     PANIC ("swap_out : this is not type_swap");
 
   lock_acquire(&sd.lock);
@@ -41,9 +41,9 @@ bool swap_out (struct frame_entry *fe)
 
   for (i = 0; i < SECTORS_PER_PAGE; i++) {
     disk_write (sd.swap_disk, sect_start*SECTORS_PER_PAGE + i,
-		 (char *)(fe->frame + i*BLOCK_SECTOR_SIZE));
+		 (char *)(fe->frame + i*DISK_SECTOR_SIZE));
   }
-  fe->s_ent->swap_idx = sect_start;
+  fe->se->swap_idx = sect_start;
 
   lock_release(&sd.lock);
   return true;
@@ -57,22 +57,22 @@ bool swap_in (struct frame_entry *fe)
   if (fe == NULL || sd.swap_disk == NULL || sd.swap_map == NULL)
     PANIC ("swap_in : NULL failed");
 
-  if(fe->s_ent == NULL)
-    PANIC ("swap_in : s_ent is NULL");
+  if(fe->se == NULL)
+    PANIC ("swap_in : se is NULL");
 
-  if (!fe->s_ent->type_swap)
+  if (!fe->se->type_swap)
     PANIC ("swap_in : this is not type_swap");
 
 
   lock_acquire(&sd.lock);
 
-  sect_start = fe->s_ent->swap_idx;
-  if (sect_start > sd.num_slot)
+  sect_start = fe->se->swap_idx;
+  if (sect_start > (unsigned)sd.num_slot)
      PANIC ("swap_in : sector index error ");
 
   for (i = 0; i < SECTORS_PER_PAGE; i++) {
     disk_read (sd.swap_disk, sect_start*SECTORS_PER_PAGE + i,
-		 (char *)(fe->frame + i*BLOCK_SECTOR_SIZE));
+		 (char *)(fe->frame + i*DISK_SECTOR_SIZE));
   }
 
   lock_release(&sd.lock);
@@ -80,7 +80,7 @@ bool swap_in (struct frame_entry *fe)
 }  
 
 
-bool fe_init ()
+void fe_init ()
 {
   lock_init(&ft.lock);
   list_init(&ft.frame_list);
@@ -104,10 +104,10 @@ struct frame_entry* fe_alloc (struct sup_entry *se)
       fe->frame = palloc_get_page (PAL_USER);
       ASSERT (fe->frame);
     }
-  if (list_insert (&ft.frame_list, fe->elem) == NULL)
-    PANIC ("frame_alloc : list insert failed");
+  list_push_back (&ft.frame_list, &fe->elem);
+   
  
-  fe->s_ent = se;
+  fe->se = se;
   se->fe = fe;
   se->thread = thread_current ();
 
@@ -122,7 +122,7 @@ bool fe_remove (struct frame_entry *fe)
   bool frame_removed = false;
   lock_acquire(&ft.lock);
   
-  for (iter = list_begin(&ft); iter != list_end(&ft);
+  for (iter = list_begin(&ft.frame_list); iter != list_end(&ft.frame_list);
        iter = list_next(iter)){
     
     fe_tmp = list_entry(iter, struct frame_entry, elem);
@@ -144,19 +144,21 @@ bool fe_remove (struct frame_entry *fe)
 bool fe_evict ()
 {
   struct list_elem *iter;
-  struct frame_entry *fe;
+  struct frame_entry *fe = NULL;
   struct sup_entry *se_tmp;
   bool ret = false;
-  bool is_accessed = false;
+ 
   int acc_cnt;
 
   //find fe to evict
   for (iter = list_begin (&ft.frame_list); 
-       list_next(iter) != list_end(&ft.frame_list; 
+       list_next(iter) != list_end(&ft.frame_list); 
        iter = list_next(iter) ) 
     {
       acc_cnt = 0;
-      fe = list_entnry (iter, struct sup_entry, elem);
+      fe = list_entry (iter, struct frame_entry, elem);
+      if (fe == NULL)
+	PANIC ("fe_evict: NULL error");
       se_tmp = fe->se;
       
       do {
@@ -172,7 +174,7 @@ bool fe_evict ()
       if (acc_cnt == 0) break;
     }
   
-  if (fe->s_ent->type_swap) 
+  if (fe->se->type_swap) 
     {
       swap_out (fe); 
       ret = fe_remove (fe);     	
@@ -236,12 +238,12 @@ static void page_destroy_func (struct hash_elem *e, void *aux UNUSED)
 
 void sup_init ()
 {
-  hash_init (&thread_current()->spt.sup_hash, page_hash_func, page_less_func, NULL);
+  hash_init (&thread_current()->sup_hash, page_hash_func, page_less_func, NULL);
 }
 
 void pt_destroy ()
 {
-  hash_destroy (&thread_current()->spt.sup_hash, page_destroy_func);
+  hash_destroy (&thread_current()->sup_hash, page_destroy_func);
 }
 
 struct sup_entry* get_se (void *uva)
@@ -249,7 +251,7 @@ struct sup_entry* get_se (void *uva)
   struct sup_entry se;
   se.uva = pg_round_down(uva);
 
-  struct hash_elem *e = hash_find(&thread_current()->spt, &se.elem);
+  struct hash_elem *e = hash_find(&thread_current()->sup_hash, &se.elem);
   if (e == NULL)
     {
       return NULL;
@@ -263,18 +265,20 @@ struct sup_entry* get_se (void *uva)
 void load_swap (struct sup_entry *se)
 {
   struct sup_entry * se_tmp;
+  struct frame_enry* fe;
   se_tmp = se;
 
   //only ali header has swap_idx
   while (se_tmp->ali_prev == NULL) 
     se_tmp = se_tmp->ali_prev;
 
-  struct frame_enry *fe = fe_alloc(se_tmp);
+  fe = fe_alloc(se_tmp);
   swap_in (fe);
 }
 
 bool grow_stack (void *uva) 
 {
+  struct thread *t;
   if (PHYS_BASE - pg_round_down(uva) > MAX_STACK_SIZE)
       return false;
 
@@ -288,11 +292,15 @@ bool grow_stack (void *uva)
   fe_alloc (se);
 
 
-  if(!install_page (se->uva, se->fe->frame, se->writable))
-    fe_remove (se->fe);
-  return false;
+  t = thread_current();
+  if (!(pagedir_get_page (t->pagedir, se->uva) == NULL
+       && pagedir_set_page (t->pagedir, se->uva, se->fe->frame, se->writable)))
+    {
+      fe_remove (se->fe);
+      return false;
+    }
 
-  hash_insert(&thread_current()->spt, &se->elem);
+  hash_insert(&thread_current()->sup_hash, &se->elem);
   return true;
 }
 
