@@ -3,10 +3,10 @@
 
 bool swap_init () 
 {
-  sd.swap_block = block_get_role (BLOCK_SWAP);
-  if (sd.swap_block == NULL)
+  sd.swap_disk = disk.get (1:1);
+  if (sd.swap_disk == NULL)
     return false;
-  sd.num_slot = block_size(sd.swap_block)/SECTORS_PER_PAGE;
+  sd.num_slot = disk_size(sd.swap_disk)/SECTORS_PER_PAGE;
 
   sd.swap_map = bitmap_create(sd.num_slot);
   if (sd.swap_map == NULL)
@@ -24,9 +24,9 @@ bool swap_init ()
 bool swap_out (struct frame_entry *fe)
 {
   int i;
-  block_sector_t sect_start;
+  disk_sector_t sect_start;
 
-  if (fe == NULL || sd.swap_block == NULL || sd.swap_map == NULL)
+  if (fe == NULL || sd.swap_disk == NULL || sd.swap_map == NULL)
     PANIC ("swap_out : NULL failed");
   if(fe->s_ent == NULL)
     PANIC ("swap_out : s_ent is NULL");
@@ -40,7 +40,7 @@ bool swap_out (struct frame_entry *fe)
     PANIC("swap_out : bitmap error");
 
   for (i = 0; i < SECTORS_PER_PAGE; i++) {
-    block_write (sd.swap_block, sect_start*SECTORS_PER_PAGE + i,
+    disk_write (sd.swap_disk, sect_start*SECTORS_PER_PAGE + i,
 		 (char *)(fe->frame + i*BLOCK_SECTOR_SIZE));
   }
   fe->s_ent->swap_idx = sect_start;
@@ -52,9 +52,9 @@ bool swap_out (struct frame_entry *fe)
 bool swap_in (struct frame_entry *fe)
 {
   int i;
-  block_sector_t sect_start;
+  disk_sector_t sect_start;
 
-  if (fe == NULL || sd.swap_block == NULL || sd.swap_map == NULL)
+  if (fe == NULL || sd.swap_disk == NULL || sd.swap_map == NULL)
     PANIC ("swap_in : NULL failed");
 
   if(fe->s_ent == NULL)
@@ -71,7 +71,7 @@ bool swap_in (struct frame_entry *fe)
      PANIC ("swap_in : sector index error ");
 
   for (i = 0; i < SECTORS_PER_PAGE; i++) {
-    block_read (sd.swap_block, sect_start*SECTORS_PER_PAGE + i,
+    disk_read (sd.swap_disk, sect_start*SECTORS_PER_PAGE + i,
 		 (char *)(fe->frame + i*BLOCK_SECTOR_SIZE));
   }
 

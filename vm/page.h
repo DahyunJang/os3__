@@ -8,7 +8,7 @@
 #include "threads/palloc.h"
 #include "threads/interrupt.h"
 #include "threads/synch.h"
-#include "devices/block.h"
+#include "devices/disk.h"
 #include "userprog/syscall.h"
 #include "userprog/exception.h"
 
@@ -20,7 +20,7 @@ struct swap_disk {
   struct lock lock;
   struct bitmap *swap_map;
 
-  struct block *swap_block;
+  struct disk *swap_disk;
   int num_slot; //number of slot
 
 } sd;
@@ -60,7 +60,7 @@ struct sup_entry {
   struct sup_entry *ali_prev; //aliased se
   struct sup_entry *ali_next;
   
-  block_sector_t swap_idx;
+  disk_sector_t swap_idx;
 
   bool writable = true; //when is it becomes false?
   //free rsc when process terminated
