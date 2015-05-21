@@ -89,7 +89,10 @@ thread_init (void)
 {
   ASSERT (intr_get_level () == INTR_OFF);
 
-  //sup_init();
+  #ifdef USERPROG
+  sup_init();
+  fe_init ();
+  #endif
 
   lock_init (&tid_lock);
   list_init (&ready_list);
@@ -291,6 +294,7 @@ thread_exit (void)
 
 #ifdef USERPROG
   process_exit ();
+  sup_destroy ();
 #endif
 
   /* Just set our status to dying and schedule another process.

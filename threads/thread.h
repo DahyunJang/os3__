@@ -5,8 +5,8 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
-#include <hash.h>
-
+#include "vm/page.h"
+#include "vm/frame.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -98,8 +98,14 @@ struct thread
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
-#endif
     struct hash sup_hash;
+    struct list mmap_list;
+    int mapid_cnt;
+    struct frame_table ft;
+#endif
+
+
+
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
 		

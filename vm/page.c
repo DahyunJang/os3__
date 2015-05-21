@@ -1,251 +1,26 @@
 #include "vm/page.h"
 
-
-bool swap_init () 
-{
-  sd.swap_disk = disk_get (1,1); //swap
-  if (sd.swap_disk == NULL)
-    return false;
-  sd.num_slot = disk_size(sd.swap_disk)/SECTORS_PER_PAGE;
-
-  sd.swap_map = bitmap_create(sd.num_slot);
-  if (sd.swap_map == NULL)
-    return false;
-
-  bitmap_set_all(sd.swap_map, false);
-
-  lock_init(&sd.lock);
-  return true;
-}
-
-
-
-
-bool swap_out (struct frame_entry *fe)
-{
-  int i;
-  disk_sector_t sect_start;
-
-  if (fe == NULL || sd.swap_disk == NULL || sd.swap_map == NULL)
-    PANIC ("swap_out : NULL failed");
-  if(fe->se == NULL)
-    PANIC ("swap_out : se is NULL");
-  if (!fe->se->type_swap)
-    PANIC ("swap_out : this is not type_swap");
-
-  lock_acquire(&sd.lock);
-
-  sect_start = bitmap_scan_and_flip (sd.swap_map, 0, 1, false); 
-  if (sect_start == BITMAP_ERROR)
-    PANIC("swap_out : bitmap error");
-
-  for (i = 0; i < SECTORS_PER_PAGE; i++) {
-    disk_write (sd.swap_disk, sect_start*SECTORS_PER_PAGE + i,
-		 (char *)(fe->frame + i*DISK_SECTOR_SIZE));
-  }
-  fe->se->swap_idx = sect_start;
-
-  lock_release(&sd.lock);
-  return true;
-} 
-
-bool swap_in (struct frame_entry *fe)
-{
-  int i;
-  disk_sector_t sect_start;
-
-  if (fe == NULL || sd.swap_disk == NULL || sd.swap_map == NULL)
-    PANIC ("swap_in : NULL failed");
-
-  if(fe->se == NULL)
-    PANIC ("swap_in : se is NULL");
-
-  if (!fe->se->type_swap)
-    PANIC ("swap_in : this is not type_swap");
-
-
-  lock_acquire(&sd.lock);
-
-  sect_start = fe->se->swap_idx;
-  if (sect_start > (unsigned)sd.num_slot)
-     PANIC ("swap_in : sector index error ");
-
-  for (i = 0; i < SECTORS_PER_PAGE; i++) {
-    disk_read (sd.swap_disk, sect_start*SECTORS_PER_PAGE + i,
-		 (char *)(fe->frame + i*DISK_SECTOR_SIZE));
-  }
-
-  lock_release(&sd.lock);
-  return true;
-}  
-
-
-void fe_init ()
-{
-  lock_init(&ft.lock);
-  list_init(&ft.frame_list);
-}
-
-struct frame_entry* fe_alloc (struct sup_entry *se)
-{ 
-  struct frame_entry *fe;
-
-  if (se == NULL) 
-    PANIC ("frame_alloc: se is NULL");
-  
-  lock_acquire (&ft.lock);
-
-  fe = malloc (sizeof(struct frame_entry));
- 
-  fe->frame = palloc_get_page (PAL_USER);
-  if (fe->frame == NULL)
-    {
-      fe_evict();
-      fe->frame = palloc_get_page (PAL_USER);
-      ASSERT (fe->frame);
-    }
-  list_push_back (&ft.frame_list, &fe->elem);
-   
- 
-  fe->se = se;
-  se->fe = fe;
-  se->thread = thread_current ();
-
-  lock_release (&ft.lock);
-  return fe;
-}
-
-bool fe_remove (struct frame_entry *fe)
-{
-  struct list_elem *iter;
-  struct frame_entry *fe_tmp;
-  bool frame_removed = false;
-  lock_acquire(&ft.lock);
-  
-  for (iter = list_begin(&ft.frame_list); iter != list_end(&ft.frame_list);
-       iter = list_next(iter)){
-    
-    fe_tmp = list_entry(iter, struct frame_entry, elem);
-    if (fe == fe_tmp)
-      {	
-	list_remove(iter);
-	palloc_free_page(fe->frame);
-	free(fe);
-	frame_removed = true;
-	break;
-      }
-  }
-  lock_release (&ft.lock);
-
-  return frame_removed; 
-}
-
-
-bool fe_evict ()
-{
-  struct list_elem *iter;
-  struct frame_entry *fe = NULL;
-  struct sup_entry *se_tmp;
-  bool ret = false;
- 
-  int acc_cnt;
-
-  //find fe to evict
-  for (iter = list_begin (&ft.frame_list); 
-       list_next(iter) != list_end(&ft.frame_list); 
-       iter = list_next(iter) ) 
-    {
-      acc_cnt = 0;
-      fe = list_entry (iter, struct frame_entry, elem);
-      if (fe == NULL)
-	PANIC ("fe_evict: NULL error");
-      se_tmp = fe->se;
-      
-      do {
-	if (pagedir_is_accessed (se_tmp->thread->pagedir, se_tmp->uva))
-	  {
-	    pagedir_set_accessed (se_tmp->thread->pagedir, se_tmp->uva, false);
-	    acc_cnt ++;
-	  }
-
-	se_tmp = se_tmp->ali_next;
-      }while (se_tmp != NULL);
-
-      if (acc_cnt == 0) break;
-    }
-  
-  if (fe->se->type_swap) 
-    {
-      swap_out (fe); 
-      ret = fe_remove (fe);     	
-    }
-
-  else 
-    { 
-      //project 3-2, other types like file
-      //if page is dirty write to file
-    }
-
-  
-  return ret;
-}
-
-
-
-
-static unsigned page_hash_func (const struct hash_elem *e, void *aux UNUSED)
-{
-  struct sup_entry *se = hash_entry(e, struct sup_entry, elem);
-  return hash_int((int) se->uva);
-}
-
-static bool page_less_func (const struct hash_elem *a,
-			    const struct hash_elem *b,
-			    void *aux UNUSED)
-{
-  struct sup_entry *sa = hash_entry(a, struct sup_entry, elem);
-  struct sup_entry *sb = hash_entry(b, struct sup_entry, elem);
- 
-  return (sa->uva < sb->uva);
-}
-
-static void page_destroy_func (struct hash_elem *e, void *aux UNUSED)
-{  
-  struct sup_entry *se_h = hash_entry(e, struct sup_entry, elem);
-  
-  if (se_h->fe != NULL)
-    {
-      if (se_h->ali_prev == NULL && se_h->ali_next == NULL) 
-	fe_remove (se_h->fe);
-
-      else { //when page is aliased, do not remove frame
-	//aliased pages are chained in doubly linked list
-	if (se_h->ali_prev == NULL)//head
-	  se_h->fe->se = se_h->ali_next;
-
-	else{
-	  se_h->ali_prev->ali_next = se_h->ali_next;
-
-	  if (se_h->ali_next != NULL)
-	    se_h->ali_next->ali_prev = se_h->ali_prev;	  
-	}
-      }
-
-      pagedir_clear_page(thread_current()->pagedir, se_h->uva);
-    }
-  free(se_h);
-}
-
 void sup_init ()
 {
   hash_init (&thread_current()->sup_hash, page_hash_func, page_less_func, NULL);
+  list_init (&thread_current()->mmap_list);
+  thread_current()->mapid_cnt = 0;
 }
 
-void pt_destroy ()
+void sup_destroy ()
 {
+  struct mmap_entry *me;
   hash_destroy (&thread_current()->sup_hash, page_destroy_func);
+  while (!list_empty (&thread_current()->mmap_list)) {
+    me = list_entry (list_pop_front (&thread_current()->mmap_list));
+    se_munmap (me->mapid);
+    
+  }
+  thread_current()->mapid_cnt = 0;
 }
 
+
+/*generate default optioned sup entry*/
 struct sup_entry* get_se (void *uva)
 {
   struct sup_entry se;
@@ -261,46 +36,157 @@ struct sup_entry* get_se (void *uva)
 
 
 
-
-void load_swap (struct sup_entry *se)
-{
-  struct sup_entry * se_tmp;
-  struct frame_enry* fe;
-  se_tmp = se;
-
-  //only ali header has swap_idx
-  while (se_tmp->ali_prev == NULL) 
-    se_tmp = se_tmp->ali_prev;
-
-  fe = fe_alloc(se_tmp);
-  swap_in (fe);
-}
-
 bool grow_stack (void *uva) 
 {
-  struct thread *t;
-  if (PHYS_BASE - pg_round_down(uva) > MAX_STACK_SIZE)
+  if (PHYS_BASE - pg_round_down(uva) > MAX_STACK_SIZE) //????
       return false;
 
   struct sup_entry *se = malloc(sizeof(struct sup_entry));
   if (se == NULL)
       return false;
 
-  se->uva = pg_round_down(uva);
-  se->type_swap = true;
+  se->uva = pg_round_down(uva); //????
+  se->type = TYPE_SWAP;
+  se->pinning = true; //???????????
+  se->thread = thread_current();
+  se->writable = true; //???????????
+
   
-  fe_alloc (se);
+  if (fe_alloc (se) == NULL) {
+    free (se);
+    return false;
+  }
 
-
-  t = thread_current();
-  if (!(pagedir_get_page (t->pagedir, se->uva) == NULL
-       && pagedir_set_page (t->pagedir, se->uva, se->fe->frame, se->writable)))
-    {
-      fe_remove (se->fe);
-      return false;
-    }
 
   hash_insert(&thread_current()->sup_hash, &se->elem);
   return true;
 }
 
+bool se_mmap (struct file *file, off_t ofs, uint8_t *upage,
+              uint32_t read_bytes, uint32_t zero_bytes, bool writable) 
+{
+  struct sup_entry *se;
+  struct mmap_entry *me;
+  struct frame_entry *fe;
+
+  ASSERT ((read_bytes + zero_bytes) % PGSIZE == 0);
+  ASSERT (pg_ofs (upage) == 0);
+  ASSERT (ofs % PGSIZE == 0);
+
+  file_seek (file, ofs);
+
+
+  while (read_bytes > 0 || zero_bytes > 0) 
+    {
+      size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
+      size_t page_zero_bytes = PGSIZE - page_read_bytes;
+
+      se = malloc (sizeof (sup_entry));
+      se->writable = writable;
+      se->file = file;
+      se->read_bytes = page_read_bytes;
+      se->ofs = ofs;
+      fe = fe_alloc (se);
+      if (fe == NULL)
+        return false;
+
+      /* Load this page. */
+      if (file_read (file, fe->frame, page_read_bytes) != (int) page_read_bytes)
+        {
+          fe_remove (fe);
+          hash_delete (se->elem); 
+          free (se);
+          return false;
+	}
+
+      memset (fe->frame + page_read_bytes, 0, page_zero_bytes);
+
+      me = malloc (sizeof (mmap_entry));
+      me->mapid = &thread_current->mapid_cnt;
+      list_push_back (&thread_current->mmap_list, me->elem);
+
+      /* Advance. */
+      read_bytes -= page_read_bytes;
+      zero_bytes -= page_zero_bytes;
+      ofs += page_read_bytes;
+      upage += PGSIZE;
+    }
+  return true;
+
+}
+
+void se_munmap (int mapid)
+{
+  struct lash_elem *e; 
+  struct sup_entry *se;
+	
+  for (e = list_begin(&thread_current()->mmap_list); e = list_end(&thread_current()->mmap_list); e = list_next (e))
+    {
+        me = list_entry (e, struct me_entry, elem);
+        if (me->mapid == mapid) {//consider pinning ???????
+	  fe_remove (se);
+          
+          hash_delete (se->elem); //?
+          free (se);
+
+          list_remove (e);
+          free (me);
+
+	  return;
+	}
+    }
+  
+  PANIC ("se_munmap : mapid is not exits");
+}
+
+
+bool load_mmap (struct sup_entry *se)
+{
+  struct frame_enry* fe;
+
+  fe = fe_alloc (se);
+  if (fe == NULL)
+    return false;
+
+  if (se->read_bytes > 0)
+    {
+      lock_acquire(&filesys_lock);
+      if ((int) spte->read_bytes != file_read_at(se->file, se->fe->frame,
+                                                 se->read_bytes,
+                                                 se->offset))
+        {
+          lock_release(&filesys_lock);
+          fe_remove (se->fe);
+          return false;
+        }
+      lock_release(&filesys_lock);
+      memset(frame + se->read_bytes, 0, spte->zero_bytes);
+    }
+
+  return true;
+}
+
+
+bool load_swap (struct sup_entry *se)
+{
+  struct frame_enry* fe;
+
+  fe = fe_alloc (se);
+  if (fe == NULL)
+    return false;
+
+  return swap_in (fe);
+}
+
+bool load_page (struct sup_entry *se) 
+{
+  if (se->fe != NULL)
+    return true;
+
+  if (se->type == TYPE_MMAP)
+    return load_mmap (se);
+  else if (se->type == TYPE_MMAP)
+    return load_mmap (se);
+  else 
+    PANIC ("load : se type is not defined");
+}

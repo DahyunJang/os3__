@@ -1,83 +1,102 @@
 #include <debug.h>
-#include <bitmap.h>
 #include <hash.h>
 #include <list.h>
 #include <round.h>
+#include "threads/interrupt.h"
 #include "threads/vaddr.h"
 #include "threads/malloc.h"
 #include "threads/palloc.h"
-#include "threads/interrupt.h"
-#include "threads/synch.h"
-#include "devices/disk.h"
-#include "userprog/syscall.h"
-#include "userprog/exception.h"
 #include "userprog/pagedir.h"
+#include "threads/synch.h"
+#include "userprog/syscall.h"
 #include "userprog/process.h"
+#include "filesys/file.h"
+#include "filesys/filesys.h"
 
+#define MAX_STACK_SIZE 8000000
 
-#define SECTORS_PER_PAGE (PGSIZE/DISK_SECTOR_SIZE) 
-
-
-/*------------------- SWAP --------------------*/
-struct swap_disk {
-  struct lock lock;
-  struct bitmap *swap_map;
-
-  struct disk *swap_disk;
-  int num_slot; //number of slot
-
-} sd;
-
-/*----------------- FRAME TABLE -----------------*/
-struct frame_table {
-  struct lock lock;
-  struct list frame_list;
-} ft;
-
-struct frame_entry {
-  struct list_elem elem;
-  struct sup_entry *se;
-
-  void *frame;
-};
-
-/*---------------SUP PAGE TABLE-----------------*/
-
-//in threads structure, 
-//plz declare "struct sup_table spt";
+#define TYPE_MMAP = 0;
+#define TYPE_SWAP = 1;
 
 struct sup_entry {
   void *uva;
+  bool type;
+  bool pinning;
+
+  struct hash_elem elem;  
   struct thread *thread;
-  struct hash_elem elem;
-  bool type_swap;
+  struct frame_entry *fe;  
+  
+  bool writable;
 
-  struct frame_entry *fe;
-  
-  //only head(ali_prev == NULL) alias have swap_idx.
-  struct sup_entry *ali_prev; //aliased se
-  struct sup_entry *ali_next;
-  
+  //for mmap
+  struct file *file;
+  uint32_t read_bytes;
+  off_t ofs;
+  struct mmap_entry *me;
+
+  //for swap
   disk_sector_t swap_idx;
-
-  bool writable; //when is it becomes false?
-  //free rsc when process terminated
-  //exception error code? or page fault..
+  
 };
 
-/*---------------FUNCTIONS-----------------*/
+struct mmap_entry {
+  int mapid;
+  struct sup_entry *se;
+  struct list_elem elem;
+};
 
-bool swap_init (void); 
-bool swap_out (struct frame_entry *fe);
-bool swap_in (struct frame_entry *fe);
 
-void fe_init (void);
-struct frame_entry* fe_alloc (struct sup_entry *se);
-bool fe_remove (struct frame_entry *fe);
-bool fe_evict (void);
 
 void sup_init (void);
-void pt_destroy (void);
+void sup_destroy (void);
 struct sup_entry* get_se (void *uva);
-void load_swap (struct sup_entry *se);
+
+/*pinning-itrt is not handled yet*/
 bool grow_stack (void *uva);
+
+bool se_mmap (struct file *file, off_t ofs, uint8_t *upage,
+              uint32_t read_bytes, uint32_t zero_bytes, bool writable) 
+void se_munmap (int mapid); 
+
+bool load_mmap (struct sup_entry *se);
+bool load_swap (struct sup_entry *se);
+bool load_page (struct sup_entry *se);
+
+
+
+
+
+
+
+
+/* 
+hash supplemental functions */
+static unsigned page_hash_func (const struct hash_elem *e, void *aux UNUSED)
+{
+  struct sup_entry *se = hash_entry(e, struct sup_entry, elem);
+  return hash_int((int) se->uva);
+}
+
+static bool page_less_func (const struct hash_elem *a,
+			    const struct hash_elem *b,
+			    void *aux UNUSED)
+{
+  struct sup_entry *sa = hash_entry(a, struct sup_entry, elem);
+  struct sup_entry *sb = hash_entry(b, struct sup_entry, elem);
+ 
+  return (sa->uva < sb->uva);
+}
+
+static void page_destroy_func (struct hash_elem *e, void *aux UNUSED)
+{  
+  struct sup_entry *se_h = hash_entry(e, struct sup_entry, elem);
+  
+  if (se_h->fe != NULL)
+    {
+      pagedir_clear_page(thread_current()->pagedir, se_h->uva);
+    }
+  free(se_h);
+}
+
+
