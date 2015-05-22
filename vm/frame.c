@@ -2,8 +2,8 @@
 
 void fe_init ()
 {
-  lock_init(&thread_current->ft.lock);
-  list_init(&thread_current->ft.frame_list);
+  lock_init(&thread_current()->ft.lock);
+  list_init(&thread_current()->ft.frame_list);
 }
 
 struct frame_entry* fe_alloc (struct sup_entry *se)
@@ -13,7 +13,7 @@ struct frame_entry* fe_alloc (struct sup_entry *se)
   if (se == NULL) 
     PANIC ("frame_alloc: se is NULL");
   
-  lock_acquire (&thread_current->ft.lock);
+  lock_acquire (&thread_current()->ft.lock);
 
   fe = malloc (sizeof(struct frame_entry));
  
@@ -37,8 +37,8 @@ struct frame_entry* fe_alloc (struct sup_entry *se)
   se->fe = fe;
   se->thread = thread_current ();
 	
-  list_push_back (&thread_current->ft.frame_list, &fe->elem);
-  lock_release (&thread_current->ft.lock);
+  list_push_back (&thread_current()->ft.frame_list, &fe->elem);
+  lock_release (&thread_current()->ft.lock);
   return fe;
 }
 
@@ -49,7 +49,7 @@ bool fe_remove (struct frame_entry *fe)
   bool frame_removed = false;
   lock_acquire(&thread_current->ft.lock);
   
-  for (iter = list_begin(&thread_current->ft.frame_list); iter != list_end(&thread_current->ft.frame_list);
+  for (iter = list_begin(&thread_current()->ft.frame_list); iter != list_end(&thread_current()->ft.frame_list);
        iter = list_next(iter)){
     
     fe_tmp = list_entry(iter, struct frame_entry, elem);
@@ -63,7 +63,7 @@ bool fe_remove (struct frame_entry *fe)
 	break;
       }
   }
-  lock_release (&thread_current->ft.lock);
+  lock_release (&thread_current()->ft.lock);
 
   return frame_removed; 
 }
@@ -79,8 +79,8 @@ bool fe_evict ()
   int acc_cnt;
 
   //find fe to evict : second chance
-  for (iter = list_begin (&thread_current->ft.frame_list); 
-       iter != list_end(&thread_current->ft.frame_list); 
+  for (iter = list_begin (&thread_current()->ft.frame_list); 
+       iter != list_end(&thread_current()->ft.frame_list); 
        iter = list_next(iter) ) 
     {
       acc_cnt = 0;
@@ -100,10 +100,10 @@ bool fe_evict ()
       else break;	
     }
 
-  if (iter == list_end(&thread_current->ft.frame_list)) 
+  if (iter == list_end(&thread_current()->ft.frame_list)) 
     {
-      for (iter = list_begin (&thread_current->ft.frame_list); 
-	   iter != list_end(&thread_current->ft.frame_list); 
+      for (iter = list_begin (&thread_current()->ft.frame_list); 
+	   iter != list_end(&thread_current()->ft.frame_list); 
 	   iter = list_next(iter) ) 
 	{
 	  if (!se_tmp->pinning) 
@@ -111,7 +111,7 @@ bool fe_evict ()
 	
 	}
     }
-  if (iter == list_end(&thread_current->ft.frame_list)) 
+  if (iter == list_end(&thread_current()->ft.frame_list)) 
     PANIC ("fe_evict : all frames are pinned");
   
 

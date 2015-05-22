@@ -1,12 +1,13 @@
 #ifndef THREADS_THREAD_H
 #define THREADS_THREAD_H
 #include "threads/synch.h"
-//#include "vm/page.h"
+
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#incldue "vm/frame.h"
 #include "vm/page.h"
-#include "vm/frame.h"
+
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -101,6 +102,7 @@ struct thread
     struct hash sup_hash;
     struct list mmap_list;
     int mapid_cnt;
+    struct frame_table ft;
 #endif
 
 

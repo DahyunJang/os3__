@@ -1,5 +1,37 @@
 #include "vm/page.h"
 
+
+
+static unsigned page_hash_func (const struct hash_elem *e, void *aux UNUSED)
+{
+  struct sup_entry *se = hash_entry(e, struct sup_entry, elem);
+  return hash_int((int) se->uva);
+}
+
+static bool page_less_func (const struct hash_elem *a,
+			    const struct hash_elem *b,
+			    void *aux UNUSED)
+{
+  struct sup_entry *sa = hash_entry(a, struct sup_entry, elem);
+  struct sup_entry *sb = hash_entry(b, struct sup_entry, elem);
+ 
+  return (sa->uva < sb->uva);
+}
+
+static void page_destroy_func (struct hash_elem *e, void *aux UNUSED)
+{  
+  struct sup_entry *se_h = hash_entry(e, struct sup_entry, elem);
+  
+  if (se_h->fe != NULL)
+    {
+      pagedir_clear_page(thread_current()->pagedir, se_h->uva);
+    }
+  free(se_h);
+}
+
+
+
+
 void sup_init ()
 {
   hash_init (&thread_current()->sup_hash, page_hash_func, page_less_func, NULL);
@@ -190,3 +222,8 @@ bool load_page (struct sup_entry *se)
   else 
     PANIC ("load : se type is not defined");
 }
+
+
+
+
+

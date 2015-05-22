@@ -7,6 +7,7 @@
 #include "threads/init.h"
 #include "threads/malloc.h"
 #include "filesys/file.h"
+#include "vm/page.h"
 
 static void syscall_handler (struct intr_frame *);
 
@@ -83,8 +84,6 @@ syscall_handler (struct intr_frame *f UNUSED)
 			close((int)*(p + 1));
 			f->eax = 0;
 			break;
-
-
 		case SYS_MMAP:
 			f->eax = mmap((int)*(p + 1), *(p + 2);
 			break;
@@ -287,12 +286,12 @@ int mmap (int fd , void * addr ) {
   uint32_t zero_bytes = PGSIZE - read_bytes % PGSIZE; 
   bool writable = true;
 
-  thread_current->mapid_cnt++;
+  thread_current()->mapid_cnt++;
 
   if(!se_mmap (file, ofs, addr, read_bytes, zero_bytes, writable)){
     PANIC ("syscall mmap: mmap is failed");
-    thread_current->mapid_cnt--;
+    thread_current()->mapid_cnt--;
   }
 
- return thread_current->mapid_cnt;
+  return thread_current()->mapid_cnt;
 }

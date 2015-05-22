@@ -34,6 +34,9 @@
 #include "filesys/filesys.h"
 #include "filesys/fsutil.h"
 #endif
+#ifdef VM
+#include "vm/swap.h"
+#endif
 
 /* Amount of physical memory, in 4 kB pages. */
 size_t ram_pages;
@@ -117,6 +120,8 @@ main (void)
 #ifdef VM
   swap_init();
 #endif
+
+
 
 
   printf ("Boot complete.\n");
@@ -251,9 +256,6 @@ parse_options (char **argv)
 #ifdef USERPROG
       else if (!strcmp (name, "-ul"))
         user_page_limit = atoi (value);
-#endif
-#ifdef VM
-///
 #endif
 
       else

@@ -1,10 +1,12 @@
+#ifndef __VM_SWAP_H__
+#define __VM_SWAP_H__
+
 #include <bitmap.h>
 #include <debug.h>
 #include "devices/disk.h"
 #include "threads/synch.h"
 
-#include "vm/frame.h"
-#include "vm/page.h"
+
 
 #define SECTORS_PER_PAGE (PGSIZE/DISK_SECTOR_SIZE) 
 
@@ -15,8 +17,9 @@ struct swap_disk {
   struct disk *swap_disk;
   int num_slot; //number of slot
 
-} sd;
+};
 
+#endif /* __VM_SWAP_H__*/
 
 bool swap_init (void); 
 bool swap_out (struct frame_entry *fe);

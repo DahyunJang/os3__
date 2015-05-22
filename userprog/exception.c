@@ -125,6 +125,7 @@ kill (struct intr_frame *f)
 static void
 page_fault (struct intr_frame *f) 
 {
+  struct sup_entry *se;
   bool is_loaded;
 
   bool not_present;  /* True: not-present page, false: writing r/o page. */
@@ -158,12 +159,12 @@ page_fault (struct intr_frame *f)
 
   if (not_present && is_user_vaddr(fault_addr) && user)
   {
-      struct sup_page_entry *se = get_se (fault_addr);
+      se = get_se (fault_addr);
       if (se) 
 	{
           is_loaded = load_page (se);
         }
-      else if (fault_addr >= f->esp - STACK_MAX_SIZE)
+      else if (fault_addr >= f->esp - MAX_STACK_SIZE)
 	{
           is_loaded = grow_stack(fault_addr);
         }

@@ -91,6 +91,7 @@ thread_init (void)
 
   #ifdef USERPROG
   sup_init();
+  fe_init ();
   #endif
 
   lock_init (&tid_lock);

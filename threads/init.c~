@@ -114,9 +114,7 @@ main (void)
   disk_init ();
   filesys_init (format_filesys);
 #endif
-#ifdef VM
-  swap_init();
-#endif
+
 
 
   printf ("Boot complete.\n");
@@ -251,9 +249,6 @@ parse_options (char **argv)
 #ifdef USERPROG
       else if (!strcmp (name, "-ul"))
         user_page_limit = atoi (value);
-#endif
-#ifdef VM
-///
 #endif
 
       else

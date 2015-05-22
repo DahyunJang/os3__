@@ -1,12 +1,13 @@
 #ifndef THREADS_THREAD_H
 #define THREADS_THREAD_H
 #include "threads/synch.h"
-//#include "vm/page.h"
+
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#incldue "vm/frame.h"
 #include "vm/page.h"
-#include "vm/frame.h"
+
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -98,6 +99,8 @@ struct thread
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
+#endif
+#ifdef VM
     struct hash sup_hash;
     struct list mmap_list;
     int mapid_cnt;

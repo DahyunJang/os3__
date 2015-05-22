@@ -1,12 +1,16 @@
+#ifndef __VM_FRMAE_H__
+#define __VM_FRMAE_H__
+
 #include <debug.h>
 #include <list.h>
 #include "threads/vaddr.h"
 #include "threads/malloc.h"
 #include "threads/palloc.h"
 #include "threads/synch.h"
-
+#include "userprog/pagedir.h"
 #include "vm/swap.h"
 #include "vm/page.h"
+
 
 
 struct frame_table {
@@ -20,6 +24,9 @@ struct frame_entry {
 
   void *frame;
 };
+
+
+#endif /* __VM_FRMAE_H__*/
 
 void fe_init (void);
 struct frame_entry* fe_alloc (struct sup_entry *se);

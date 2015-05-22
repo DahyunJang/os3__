@@ -89,7 +89,7 @@ thread_init (void)
 {
   ASSERT (intr_get_level () == INTR_OFF);
 
-  #ifdef USERPROG
+  #ifdef VM
   sup_init();
   fe_init ();
   #endif
@@ -443,7 +443,7 @@ is_thread (struct thread *t)
 static void
 init_thread (struct thread *t, const char *name, int priority)
 {
-	struct thread *parent;
+
 	
   ASSERT (t != NULL);
   ASSERT (PRI_MIN <= priority && priority <= PRI_MAX);
