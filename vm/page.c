@@ -1,5 +1,18 @@
 #include "vm/page.h"
-
+#include "threads/vaddr.h"
+#include <string.h>
+#include <hash.h>
+#include <debug.h>
+#include "threads/interrupt.h" //pinning
+//#include "userprog/syscall.h"
+#include "filesys/file.h"
+#include "filesys/filesys.h"
+#include "filesys/off_t.h"
+#include "userprog/pagedir.h"
+#include "threads/thread.h"
+#include "threads/malloc.h"
+#include "vm/swap.h"
+//#include "vm/page.h"
 
 
 static unsigned page_hash_func (const struct hash_elem *e, void *aux UNUSED)
@@ -35,20 +48,21 @@ static void page_destroy_func (struct hash_elem *e, void *aux UNUSED)
 void sup_init ()
 {
   hash_init (&thread_current()->sup_hash, page_hash_func, page_less_func, NULL);
-  list_init (&thread_current()->mmap_list);
-  thread_current()->mapid_cnt = 0;
+  // list_init (&thread_current()->mmap_list);
+  // thread_current()->mapid_cnt = 0;
 }
 
 void sup_destroy ()
 {
-  struct mmap_entry *me;
+  //  struct mmap_entry *me;
   hash_destroy (&thread_current()->sup_hash, page_destroy_func);
-  while (!list_empty (&thread_current()->mmap_list)) {
+  /* while (!list_empty (&thread_current()->mmap_list)) {
     me = list_entry (list_pop_front (&thread_current()->mmap_list));
     se_munmap (me->mapid);
-    
+  
   }
-  thread_current()->mapid_cnt = 0;
+ thread_current()->mapid_cnt = 0;
+  */
 }
 
 
@@ -78,7 +92,7 @@ bool grow_stack (void *uva)
       return false;
 
   se->uva = pg_round_down(uva); //????
-  se->type = TYPE_SWAP;
+  //se->type = TYPE_SWAP;
   se->pinning = true; //???????????
   se->thread = thread_current();
   se->writable = true; //???????????
@@ -94,7 +108,7 @@ bool grow_stack (void *uva)
   return true;
 }
 
-bool se_mmap (struct file *file, off_t ofs, uint8_t *upage,
+bool se_mmap (struct file *file, uint32_t ofs, uint8_t *upage,
               uint32_t read_bytes, uint32_t zero_bytes, bool writable) 
 {
   struct sup_entry *se;
@@ -113,7 +127,7 @@ bool se_mmap (struct file *file, off_t ofs, uint8_t *upage,
       size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
-      se = malloc (sizeof (sup_entry));
+      se = malloc (sizeof (struct sup_entry));
       se->writable = writable;
       se->file = file;
       se->read_bytes = page_read_bytes;
@@ -126,16 +140,18 @@ bool se_mmap (struct file *file, off_t ofs, uint8_t *upage,
       if (file_read (file, fe->frame, page_read_bytes) != (int) page_read_bytes)
         {
           fe_remove (fe);
-          hash_delete (se->elem); 
+          hash_delete (&thread_current()->sup_hash,
+		       &se->elem);
           free (se);
           return false;
 	}
 
       memset (fe->frame + page_read_bytes, 0, page_zero_bytes);
 
-      me = malloc (sizeof (mmap_entry));
-      me->mapid = &thread_current->mapid_cnt;
-      list_push_back (&thread_current->mmap_list, me->elem);
+      me = malloc (sizeof (struct mmap_entry));
+      me->mapid = thread_current()->mapid_cnt;
+      list_push_back (&thread_current()->mmap_list, 
+		      &me->elem);
 
       /* Advance. */
       read_bytes -= page_read_bytes;
@@ -149,16 +165,20 @@ bool se_mmap (struct file *file, off_t ofs, uint8_t *upage,
 
 void se_munmap (int mapid)
 {
-  struct lash_elem *e; 
+  struct list_elem *e; 
   struct sup_entry *se;
+  struct mmap_entry *me;
 	
-  for (e = list_begin(&thread_current()->mmap_list); e = list_end(&thread_current()->mmap_list); e = list_next (e))
+  for (e = list_begin(&thread_current()->mmap_list);
+       e != list_end(&thread_current()->mmap_list);
+       e = list_next (e))
     {
-        me = list_entry (e, struct me_entry, elem);
+        me = list_entry (e, struct mmap_entry, elem);
         if (me->mapid == mapid) {//consider pinning ???????
-	  fe_remove (se);
+	  se = me->se;
+	  fe_remove(se->fe);
           
-          hash_delete (se->elem); //?
+          hash_delete (&thread_current()->sup_hash, &se->elem); //?
           free (se);
 
           list_remove (e);
@@ -174,7 +194,7 @@ void se_munmap (int mapid)
 
 bool load_mmap (struct sup_entry *se)
 {
-  struct frame_enry* fe;
+  struct frame_entry* fe;
 
   fe = fe_alloc (se);
   if (fe == NULL)
@@ -182,17 +202,18 @@ bool load_mmap (struct sup_entry *se)
 
   if (se->read_bytes > 0)
     {
-      lock_acquire(&filesys_lock);
-      if ((int) spte->read_bytes != file_read_at(se->file, se->fe->frame,
+      //lock_acquire(&filesys_lock);
+      if ((int) se->read_bytes != file_read_at(se->file, se->fe->frame,
                                                  se->read_bytes,
-                                                 se->offset))
+                                                 se->ofs))
         {
-          lock_release(&filesys_lock);
+          //lock_release(&filesys_lock);
           fe_remove (se->fe);
           return false;
         }
-      lock_release(&filesys_lock);
-      memset(frame + se->read_bytes, 0, spte->zero_bytes);
+      //lock_release(&filesys_lock);
+      memset(se->fe->frame + se->read_bytes, 0, 
+	     PGSIZE - se->read_bytes);
     }
 
   return true;
@@ -201,7 +222,7 @@ bool load_mmap (struct sup_entry *se)
 
 bool load_swap (struct sup_entry *se)
 {
-  struct frame_enry* fe;
+  struct frame_entry* fe;
 
   fe = fe_alloc (se);
   if (fe == NULL)
@@ -209,16 +230,16 @@ bool load_swap (struct sup_entry *se)
 
   return swap_in (fe);
 }
-
+#if 1
 bool load_page (struct sup_entry *se) 
 {
   if (se->fe != NULL)
     return true;
 
-  if (se->type == TYPE_MMAP)
-    return load_mmap (se);
-  else if (se->type == TYPE_MMAP)
-    return load_mmap (se);
+  if (se->type == TYPE_SWAP)
+    return load_swap (se);
+  //  else if (se->type == TYPE_MMAP)
+  //  return load_mmap (se);
   else 
     PANIC ("load : se type is not defined");
 }
@@ -226,4 +247,4 @@ bool load_page (struct sup_entry *se)
 
 
 
-
+#endif

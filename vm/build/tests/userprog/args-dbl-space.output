@@ -1,0 +1,15 @@
+Copying tests/userprog/args-dbl-space into /tmp/39E74Mb08F.dsk...
+Writing command line to /tmp/iYXOv9H9RJ.dsk...
+qemu -hda /tmp/iYXOv9H9RJ.dsk -hdb /tmp/2SwLiGrY42.dsk -hdc /tmp/39E74Mb08F.dsk -hdd /tmp/Zb9fMiouwX.dsk -m 4 -net none -nographic -monitor null
+Kernel command line: -q -f put args-dbl-space run 'args-dbl-space two  spaces!'
+Kernel PANIC at ../../threads/thread.c:272 in thread_current(): assertion `t->status == THREAD_RUNNING' failed.
+Call stack: 0xc0107336 0xc0100b99 0xc010cf17 0xc0100f1a 0xc01007c2 0xc0100036.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 0 ticks
+Thread: 0 idle ticks, 0 kernel ticks, 0 user ticks
+Console: 491 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...

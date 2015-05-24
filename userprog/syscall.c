@@ -85,7 +85,7 @@ syscall_handler (struct intr_frame *f UNUSED)
 			f->eax = 0;
 			break;
 		case SYS_MMAP:
-			f->eax = mmap((int)*(p + 1), *(p + 2);
+			f->eax = mmap((int)*(p + 1), *(p + 2));
 			break;
 
 		case SYS_MUNMAP:
@@ -276,8 +276,9 @@ global_get_file (int fd)
 }
 
 
+
 int mmap (int fd , void * addr ) { 
-  struct file *file = global_get_file (fd) // ????
+  struct file *file = global_get_file (fd); // ????
   if (file == NULL)
     PANIC ("syscall mmap: file is null");
 

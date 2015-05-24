@@ -1,0 +1,31 @@
+Copying tests/userprog/args-none into /tmp/GX3XPEHOpF.dsk...
+Writing command line to /tmp/Zv8Xuy8oZf.dsk...
+qemu -hda /tmp/Zv8Xuy8oZf.dsk -hdb /tmp/n6ensvi8fh.dsk -hdc /tmp/GX3XPEHOpF.dsk -hdd /tmp/vvs7ftkhVI.dsk -m 4 -net none -nographic -monitor null
+Kernel command line: -q -f put args-none run args-none
+Pintos booting with 4,096 kB RAM...
+374 pages available in kernel pool.
+373 pages available in user pool.
+Calibrating timer...  87,347,200 loops/s.
+hd0:0: detected 145 sector (72 kB) disk, model "QEMU HARDDISK", serial "QM00001"
+hd0:1: detected 4,032 sector (1 MB) disk, model "QEMU HARDDISK", serial "QM00002"
+hd1:0: detected 72 sector (36 kB) disk, model "QEMU HARDDISK", serial "QM00003"
+hd1:1: detected 8,064 sector (3 MB) disk, model "QEMU HARDDISK", serial "QM00004"
+Formatting file system...done.
+Boot complete.
+Putting 'args-none' into the file system...
+Executing 'args-none':
+Kernel PANIC at ../../userprog/pagedir.c:130 in pagedir_get_page(): assertion `is_user_vaddr (uaddr)' failed.
+Call stack: 0xc0107336 0xc010a3e0 0xc0109e0e 0xc010d4b9 0xc010d181 0xc0109d78 0xc0109c67 0xc0109678 0xc0100d6b.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 96 ticks
+Thread: 0 idle ticks, 96 kernel ticks, 0 user ticks
+hd0:0: 0 reads, 0 writes
+hd0:1: 35 reads, 152 writes
+hd1:0: 72 reads, 0 writes
+hd1:1: 0 reads, 0 writes
+Console: 1189 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...

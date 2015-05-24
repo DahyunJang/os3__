@@ -14,7 +14,7 @@
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
-
+#include "vm/page.h"
 /* Random value for struct thread's `magic' member.
    Used to detect stack overflow.  See the big comment at the top
    of thread.h for details. */
@@ -89,10 +89,6 @@ thread_init (void)
 {
   ASSERT (intr_get_level () == INTR_OFF);
 
-  #ifdef USERPROG
-  sup_init();
-  fe_init ();
-  #endif
 
   lock_init (&tid_lock);
   list_init (&ready_list);
@@ -443,7 +439,7 @@ is_thread (struct thread *t)
 static void
 init_thread (struct thread *t, const char *name, int priority)
 {
-	struct thread *parent;
+
 	
   ASSERT (t != NULL);
   ASSERT (PRI_MIN <= priority && priority <= PRI_MAX);
@@ -467,6 +463,10 @@ init_thread (struct thread *t, const char *name, int priority)
 	sema_init (&t->init2, 0); // NOW
 
 	
+  #ifdef VM
+  sup_init();
+  fe_init ();
+  #endif
 	/* PROJECT 2 END */
 }
 

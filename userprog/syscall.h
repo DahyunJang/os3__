@@ -20,6 +20,7 @@ int write (int fd, const void *buffer, unsigned size);
 void seek (int fd, unsigned position);
 unsigned tell (int fd);
 void close (int fd);
+int mmap (int fd , void * addr );
 
 struct file_elem* process_get_file (int fd);
 struct file* global_get_file (int fd);

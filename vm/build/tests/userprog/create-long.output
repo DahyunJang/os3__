@@ -1,0 +1,15 @@
+Copying tests/userprog/create-long into /tmp/JStJWOsn0A.dsk...
+Writing command line to /tmp/xApQcsoLyN.dsk...
+qemu -hda /tmp/xApQcsoLyN.dsk -hdb /tmp/eXMbflXOnd.dsk -hdc /tmp/JStJWOsn0A.dsk -hdd /tmp/0byxAuN8jr.dsk -m 4 -net none -nographic -monitor null
+Kernel command line: -q -f put create-long run create-long
+Kernel PANIC at ../../threads/thread.c:272 in thread_current(): assertion `t->status == THREAD_RUNNING' failed.
+Call stack: 0xc0107336 0xc0100b99 0xc010cf17 0xc0100f1a 0xc01007c2 0xc0100036.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 0 ticks
+Thread: 0 idle ticks, 0 kernel ticks, 0 user ticks
+Console: 470 characters output
+Keyboard: 0 keys pressed
+Exception: 0 page faults
+Powering off...

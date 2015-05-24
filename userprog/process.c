@@ -1,4 +1,4 @@
-#include "userprog/process.h"
+//#include "userprog/process.h"
 #include <debug.h>
 #include <inttypes.h>
 #include <round.h>
@@ -127,6 +127,11 @@ start_process (void *f_name)
 	struct list arg_list;
 	char *token;
 	struct thread *t = thread_current ();
+
+  #ifdef VM
+  sup_init();
+  fe_init ();
+  #endif
 	
 	file_name = strtok_r (file_name, " ", &save_ptr);
 	*(file_name + strlen(file_name)) = '\0';
@@ -512,7 +517,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
 
 /* load() helpers. */
 
-static bool install_page (void *upage, void *kpage, bool writable);
+bool install_page (void *upage, void *kpage, bool writable);
 
 /* Checks whether PHDR describes a valid, loadable segment in
    FILE and returns true if so, false otherwise. */
@@ -577,7 +582,7 @@ static bool
 load_segment (struct file *file, off_t ofs, uint8_t *upage,
               uint32_t read_bytes, uint32_t zero_bytes, bool writable) 
 {
-  se_mmap(file, ofs, upage,read_bytes, zero_bytes, writable);
+  return se_mmap(file, ofs, upage,read_bytes, zero_bytes, writable);
 }
 
 /* Create a minimal stack by mapping a zeroed page at the top of
@@ -609,7 +614,7 @@ setup_stack (void **esp)
    with palloc_get_page().
    Returns true on success, false if UPAGE is already mapped or
    if memory allocation fails. */
-static bool
+bool
 install_page (void *upage, void *kpage, bool writable)
 {
   struct thread *t = thread_current ();

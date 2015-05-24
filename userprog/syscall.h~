@@ -24,4 +24,6 @@ void close (int fd);
 struct file_elem* process_get_file (int fd);
 struct file* global_get_file (int fd);
 
+struct lock filesys_lock;
+
 #endif /* userprog/syscall.h */

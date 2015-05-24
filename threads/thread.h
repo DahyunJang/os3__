@@ -5,8 +5,9 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
-#incldue "vm/frame.h"
-#include "vm/page.h"
+#include "vm/frame.h"
+#include <hash.h>
+//#include "vm/page.h"
 
 
 /* States in a thread's life cycle. */

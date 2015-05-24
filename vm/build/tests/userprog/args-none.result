@@ -1,0 +1,13 @@
+FAIL
+Kernel panic in run: PANIC at ../../userprog/pagedir.c:130 in pagedir_get_page(): assertion `is_user_vaddr (uaddr)' failed.
+Call stack: 0xc0107336 0xc010a3e0 0xc0109e0e 0xc010d4b9 0xc010d181 0xc0109d78 0xc0109c67 0xc0109678 0xc0100d6b
+Translation of call stack:
+0xc0107336: debug_panic (.../../lib/kernel/debug.c:34)
+0xc010a3e0: pagedir_get_page (...../userprog/pagedir.c:132)
+0xc0109e0e: install_page (...../userprog/process.c:624)
+0xc010d4b9: fe_alloc (...build/../../vm/frame.c:44)
+0xc010d181: se_mmap (...build/../../vm/page.c:135)
+0xc0109d78: load_segment (...../userprog/process.c:585)
+0xc0109c67: load (...../userprog/process.c:493)
+0xc0109678: start_process (...../userprog/process.c:146)
+0xc0100d6b: kernel_thread (..../../threads/thread.c:413)

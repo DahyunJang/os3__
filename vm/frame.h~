@@ -11,7 +11,7 @@
 #include "vm/swap.h"
 #include "vm/page.h"
 
-#endif /* __VM_FRMAE_H__*/
+
 
 struct frame_table {
   struct lock lock;
@@ -24,6 +24,9 @@ struct frame_entry {
 
   void *frame;
 };
+
+
+#endif /* __VM_FRMAE_H__*/
 
 void fe_init (void);
 struct frame_entry* fe_alloc (struct sup_entry *se);

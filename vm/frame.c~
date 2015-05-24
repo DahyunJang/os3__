@@ -1,9 +1,24 @@
-#include "vm/frame.h"
+//#include "vm/frame.h"
+//#include "vm/page.h"
+#include <debug.h>
+#include <list.h>
+#include <string.h>
+#include "threads/vaddr.h"
+#include "threads/malloc.h"
+#include "threads/palloc.h"
+#include "threads/synch.h"
+#include "threads/thread.h"
+#include "userprog/pagedir.h"
+#include "userprog/process.h" //install_page()
+#include "filesys/file.h"
+#include "vm/swap.h"
+#include "vm/page.h"
+
 
 void fe_init ()
 {
-  lock_init(&thread_current->ft.lock);
-  list_init(&thread_current->ft.frame_list);
+  lock_init(&thread_current()->ft.lock);
+  list_init(&thread_current()->ft.frame_list);
 }
 
 struct frame_entry* fe_alloc (struct sup_entry *se)
@@ -13,7 +28,7 @@ struct frame_entry* fe_alloc (struct sup_entry *se)
   if (se == NULL) 
     PANIC ("frame_alloc: se is NULL");
   
-  lock_acquire (&thread_current->ft.lock);
+  lock_acquire (&thread_current()->ft.lock);
 
   fe = malloc (sizeof(struct frame_entry));
  
@@ -37,8 +52,8 @@ struct frame_entry* fe_alloc (struct sup_entry *se)
   se->fe = fe;
   se->thread = thread_current ();
 	
-  list_push_back (&thread_current->ft.frame_list, &fe->elem);
-  lock_release (&thread_current->ft.lock);
+  list_push_back (&thread_current()->ft.frame_list, &fe->elem);
+  lock_release (&thread_current()->ft.lock);
   return fe;
 }
 
@@ -47,9 +62,10 @@ bool fe_remove (struct frame_entry *fe)
   struct list_elem *iter;
   struct frame_entry *fe_tmp;
   bool frame_removed = false;
-  lock_acquire(&thread_current->ft.lock);
+  lock_acquire(&thread_current()->ft.lock);
   
-  for (iter = list_begin(&thread_current->ft.frame_list); iter != list_end(&thread_current->ft.frame_list);
+  for (iter = list_begin(&thread_current()->ft.frame_list); 
+       iter != list_end(&thread_current()->ft.frame_list);
        iter = list_next(iter)){
     
     fe_tmp = list_entry(iter, struct frame_entry, elem);
@@ -63,7 +79,7 @@ bool fe_remove (struct frame_entry *fe)
 	break;
       }
   }
-  lock_release (&thread_current->ft.lock);
+  lock_release (&thread_current()->ft.lock);
 
   return frame_removed; 
 }
@@ -79,8 +95,8 @@ bool fe_evict ()
   int acc_cnt;
 
   //find fe to evict : second chance
-  for (iter = list_begin (&thread_current->ft.frame_list); 
-       iter != list_end(&thread_current->ft.frame_list); 
+  for (iter = list_begin (&thread_current()->ft.frame_list); 
+       iter != list_end(&thread_current()->ft.frame_list); 
        iter = list_next(iter) ) 
     {
       acc_cnt = 0;
@@ -100,10 +116,10 @@ bool fe_evict ()
       else break;	
     }
 
-  if (iter == list_end(&thread_current->ft.frame_list)) 
+  if (iter == list_end(&thread_current()->ft.frame_list)) 
     {
-      for (iter = list_begin (&thread_current->ft.frame_list); 
-	   iter != list_end(&thread_current->ft.frame_list); 
+      for (iter = list_begin (&thread_current()->ft.frame_list); 
+	   iter != list_end(&thread_current()->ft.frame_list); 
 	   iter = list_next(iter) ) 
 	{
 	  if (!se_tmp->pinning) 
@@ -111,7 +127,7 @@ bool fe_evict ()
 	
 	}
     }
-  if (iter == list_end(&thread_current->ft.frame_list)) 
+  if (iter == list_end(&thread_current()->ft.frame_list)) 
     PANIC ("fe_evict : all frames are pinned");
   
 
@@ -123,11 +139,11 @@ bool fe_evict ()
 
   else if (fe->se->type == TYPE_MMAP) 
     { 
-      if (pagedir_is_dirty(t->pagedir, fe->se->uva)){
-	lock_acquire(&filesys_lock);
-	file_write_at(fe->se->file, fe->frame,fe->se->size
-		      ,fe->se->file_ofs);
-	lock_release(&filesys_lock);
+      if (pagedir_is_dirty(thread_current()->pagedir, fe->se->uva)){
+	//	lock_acquire(&filesys_lock);
+	file_write_at(fe->se->file, fe->frame, fe->se->read_bytes
+		      ,fe->se->ofs);
+	//lock_release(&filesys_lock);
       }
       ret = fe_remove (fe);     
     }

@@ -1,4 +1,20 @@
+//#include "vm/frame.h"
+//#include "vm/page.h"
+#include <debug.h>
+#include <list.h>
+#include <string.h>
+#include "threads/vaddr.h"
+#include "threads/malloc.h"
+#include "threads/palloc.h"
+#include "threads/synch.h"
+#include "threads/thread.h"
+#include "userprog/pagedir.h"
+#include "userprog/process.h" //install_page()
+#include "filesys/file.h"
 #include "vm/frame.h"
+#include "vm/swap.h"
+#include "vm/page.h"
+
 
 void fe_init ()
 {
@@ -47,9 +63,10 @@ bool fe_remove (struct frame_entry *fe)
   struct list_elem *iter;
   struct frame_entry *fe_tmp;
   bool frame_removed = false;
-  lock_acquire(&thread_current->ft.lock);
+  lock_acquire(&thread_current()->ft.lock);
   
-  for (iter = list_begin(&thread_current()->ft.frame_list); iter != list_end(&thread_current()->ft.frame_list);
+  for (iter = list_begin(&thread_current()->ft.frame_list); 
+       iter != list_end(&thread_current()->ft.frame_list);
        iter = list_next(iter)){
     
     fe_tmp = list_entry(iter, struct frame_entry, elem);
@@ -123,11 +140,11 @@ bool fe_evict ()
 
   else if (fe->se->type == TYPE_MMAP) 
     { 
-      if (pagedir_is_dirty(t->pagedir, fe->se->uva)){
-	lock_acquire(&filesys_lock);
-	file_write_at(fe->se->file, fe->frame,fe->se->size
-		      ,fe->se->file_ofs);
-	lock_release(&filesys_lock);
+      if (pagedir_is_dirty(thread_current()->pagedir, fe->se->uva)){
+	//	lock_acquire(&filesys_lock);
+	file_write_at(fe->se->file, fe->frame, fe->se->read_bytes
+		      ,fe->se->ofs);
+	//lock_release(&filesys_lock);
       }
       ret = fe_remove (fe);     
     }

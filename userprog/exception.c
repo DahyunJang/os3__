@@ -1,12 +1,13 @@
-#include "userprog/exception.h"
 #include <inttypes.h>
 #include <stdio.h>
 #include "userprog/gdt.h"
 #include "userprog/syscall.h"
+#include "userprog/process.h"
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "vm/page.h"
+#include "userprog/exception.h"
 
 /* Number of page faults processed. */
 static long long page_fault_cnt;
@@ -126,7 +127,7 @@ static void
 page_fault (struct intr_frame *f) 
 {
   struct sup_entry *se;
-  bool is_loaded;
+  bool is_loaded = false;
 
   bool not_present;  /* True: not-present page, false: writing r/o page. */
   bool write;        /* True: access was write, false: access was read. */
@@ -162,6 +163,7 @@ page_fault (struct intr_frame *f)
       se = get_se (fault_addr);
       if (se) 
 	{
+	  /*sup_init (); //should remove this !! this is just for including test*/
           is_loaded = load_page (se);
         }
       else if (fault_addr >= f->esp - MAX_STACK_SIZE)

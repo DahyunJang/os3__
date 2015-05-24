@@ -1,5 +1,6 @@
 #include "vm/swap.h"
-
+#include "threads/vaddr.h"
+struct swap_disk sd;
 
 bool swap_init () 
 {

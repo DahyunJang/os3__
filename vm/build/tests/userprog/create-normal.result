@@ -1,0 +1,10 @@
+FAIL
+Kernel panic in run: PANIC at ../../threads/thread.c:272 in thread_current(): assertion `t->status == THREAD_RUNNING' failed.
+Call stack: 0xc0107336 0xc0100b99 0xc010cf17 0xc0100f1a 0xc01007c2 0xc0100036
+Translation of call stack:
+0xc0107336: debug_panic (.../../lib/kernel/debug.c:34)
+0xc0100b99: thread_current (..../../threads/thread.c:275)
+0xc010cf17: sup_init (.../build/../../vm/page.c:50)
+0xc0100f1a: init_thread (..../../threads/thread.c:468)
+0xc01007c2: thread_init (...../../threads/thread.c:99)
+0xc0100036: main (...d/../../threads/init.c:84)
